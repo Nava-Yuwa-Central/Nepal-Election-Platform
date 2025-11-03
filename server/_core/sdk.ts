@@ -7,88 +7,95 @@ import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
-import type {
-  ExchangeTokenRequest,
-  ExchangeTokenResponse,
-  GetUserInfoResponse,
-  GetUserInfoWithJwtRequest,
-  GetUserInfoWithJwtResponse,
-} from "./types/manusTypes";
+// Removed imports related to old Manus types
+// import type {
+//   ExchangeTokenRequest,
+//   ExchangeTokenResponse,
+//   GetUserInfoResponse,
+//   GetUserInfoWithJwtRequest,
+//   GetUserInfoWithJwtResponse,
+// } from "./types/manusTypes";
+
 // Utility function
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
 export type SessionPayload = {
   openId: string;
-  appId: string;
+  appId: string; // Keep appId for now as it's in SessionPayload, but it should likely be removed for NextAuth.js
   name: string;
 };
 
-const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
-const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
-const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
+// Removed constants related to old OAuth paths
+// const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
+// const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
+// const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
 
-class OAuthService {
-  constructor(private client: ReturnType<typeof axios.create>) {
-    console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
-    if (!ENV.oAuthServerUrl) {
-      console.error(
-        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
-      );
-    }
-  }
+// Removed the entire OAuthService class
+// class OAuthService {
+//   constructor(private client: ReturnType<typeof axios.create>) {
+//     console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
+//     if (!ENV.oAuthServerUrl) {
+//       console.error(
+//         "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
+//       );
+//     }
+//   }
 
-  private decodeState(state: string): string {
-    const redirectUri = atob(state);
-    return redirectUri;
-  }
+//   private decodeState(state: string): string {
+//     const redirectUri = atob(state);
+//     return redirectUri;
+//   }
 
-  async getTokenByCode(
-    code: string,
-    state: string
-  ): Promise<ExchangeTokenResponse> {
-    const payload: ExchangeTokenRequest = {
-      clientId: ENV.appId,
-      grantType: "authorization_code",
-      code,
-      redirectUri: this.decodeState(state),
-    };
+//   async getTokenByCode(
+//     code: string,
+//     state: string
+//   ): Promise<ExchangeTokenResponse> {
+//     const payload: ExchangeTokenRequest = {
+//       clientId: ENV.appId,
+//       grantType: "authorization_code",
+//       code,
+//       redirectUri: this.decodeState(state),
+//     };
 
-    const { data } = await this.client.post<ExchangeTokenResponse>(
-      EXCHANGE_TOKEN_PATH,
-      payload
-    );
+//     const { data } = await this.client.post<ExchangeTokenResponse>(
+//       EXCHANGE_TOKEN_PATH,
+//       payload
+//     );
 
-    return data;
-  }
+//     return data;
+//   }
 
-  async getUserInfoByToken(
-    token: ExchangeTokenResponse
-  ): Promise<GetUserInfoResponse> {
-    const { data } = await this.client.post<GetUserInfoResponse>(
-      GET_USER_INFO_PATH,
-      {
-        accessToken: token.accessToken,
-      }
-    );
+//   async getUserInfoByToken(
+//     token: ExchangeTokenResponse
+//   ): Promise<GetUserInfoResponse> {
+//     const { data } = await this.client.post<GetUserInfoResponse>(
+//       GET_USER_INFO_PATH,
+//       {
+//         accessToken: token.accessToken,
+//       }
+//     );
 
-    return data;
-  }
-}
+//     return data;
+//   }
+// }
 
-const createOAuthHttpClient = (): AxiosInstance =>
-  axios.create({
-    baseURL: ENV.oAuthServerUrl,
-    timeout: AXIOS_TIMEOUT_MS,
-  });
+// Removed createOAuthHttpClient
+// const createOAuthHttpClient = (): AxiosInstance =>
+//   axios.create({
+//     baseURL: ENV.oAuthServerUrl,
+//     timeout: AXIOS_TIMEOUT_MS,
+//   });
 
 class SDKServer {
-  private readonly client: AxiosInstance;
-  private readonly oauthService: OAuthService;
+  // Removed client and oauthService properties
+  // private readonly client: AxiosInstance;
+  // private readonly oauthService: OAuthService;
 
-  constructor(client: AxiosInstance = createOAuthHttpClient()) {
-    this.client = client;
-    this.oauthService = new OAuthService(this.client);
+  constructor(/* Removed client parameter */) {
+    // Removed initialization of client and oauthService
+    // this.client = client;
+    // this.oauthService = new OAuthService(this.client);
   }
 
   private deriveLoginMethod(
@@ -113,37 +120,37 @@ class SDKServer {
     return first ? first.toLowerCase() : null;
   }
 
-  /**
-   * Exchange OAuth authorization code for access token
-   * @example
-   * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-   */
-  async exchangeCodeForToken(
-    code: string,
-    state: string
-  ): Promise<ExchangeTokenResponse> {
-    return this.oauthService.getTokenByCode(code, state);
-  }
+  // Removed methods related to old OAuth flow
+  // /**
+  //  * Exchange OAuth authorization code for access token
+  //  * @example
+  //  * const tokenResponse = await sdk.exchangeCodeForToken(code, state);\n   *//
+  // async exchangeCodeForToken(
+  //   code: string,
+  //   state: string
+  // ): Promise<ExchangeTokenResponse> {
+  //   return this.oauthService.getTokenByCode(code, state);
+  // }
 
-  /**
-   * Get user information using access token
-   * @example
-   * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
-   */
-  async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
-    const data = await this.oauthService.getUserInfoByToken({
-      accessToken,
-    } as ExchangeTokenResponse);
-    const loginMethod = this.deriveLoginMethod(
-      (data as any)?.platforms,
-      (data as any)?.platform ?? data.platform ?? null
-    );
-    return {
-      ...(data as any),
-      platform: loginMethod,
-      loginMethod,
-    } as GetUserInfoResponse;
-  }
+  // /**
+  //  * Get user information using access token
+  //  * @example
+  //  * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+  //  *///
+  // async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
+  //   const data = await this.oauthService.getUserInfoByToken({
+  //     accessToken,
+  //   } as ExchangeTokenResponse);
+  //   const loginMethod = this.deriveLoginMethod(
+  //     (data as any)?.platforms,
+  //     (data as any)?.platform ?? data.platform ?? null
+  //   );
+  //   return {
+  //     ...(data as any),
+  //     platform: loginMethod,
+  //     loginMethod,
+  //   } as GetUserInfoResponse;
+  // }
 
   private parseCookies(cookieHeader: string | undefined) {
     if (!cookieHeader) {
@@ -171,7 +178,7 @@ class SDKServer {
     return this.signSession(
       {
         openId,
-        appId: ENV.appId,
+        appId: ENV.appId, // Keep appId for now as it's in SessionPayload, but it should likely be removed for NextAuth.js
         name: options.name || "",
       },
       options
@@ -189,7 +196,7 @@ class SDKServer {
 
     return new SignJWT({
       openId: payload.openId,
-      appId: payload.appId,
+      appId: payload.appId, // Keep appId for now
       name: payload.name,
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
@@ -232,29 +239,30 @@ class SDKServer {
     }
   }
 
-  async getUserInfoWithJwt(
-    jwtToken: string
-  ): Promise<GetUserInfoWithJwtResponse> {
-    const payload: GetUserInfoWithJwtRequest = {
-      jwtToken,
-      projectId: ENV.appId,
-    };
+  // Removed getUserInfoWithJwt as it depends on old OAuth
+  // async getUserInfoWithJwt(
+  //   jwtToken: string
+  // ): Promise<GetUserInfoWithJwtResponse> {
+  //   const payload: GetUserInfoWithJwtRequest = {
+  //     jwtToken,
+  //     projectId: ENV.appId,
+  //   };
 
-    const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
-      GET_USER_INFO_WITH_JWT_PATH,
-      payload
-    );
+  //   const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
+  //     GET_USER_INFO_WITH_JWT_PATH,
+  //     payload
+  //   );
 
-    const loginMethod = this.deriveLoginMethod(
-      (data as any)?.platforms,
-      (data as any)?.platform ?? data.platform ?? null
-    );
-    return {
-      ...(data as any),
-      platform: loginMethod,
-      loginMethod,
-    } as GetUserInfoWithJwtResponse;
-  }
+  //   const loginMethod = this.deriveLoginMethod(
+  //     (data as any)?.platforms,
+  //     (data as any)?.platform ?? data.platform ?? null
+  //   );
+  //   return {
+  //     ...(data as any),
+  //     platform: loginMethod,
+  //     loginMethod,
+  //   } as GetUserInfoWithJwtResponse;
+  // }
 
   async authenticateRequest(req: Request): Promise<User> {
     // Regular authentication flow
@@ -270,26 +278,13 @@ class SDKServer {
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
 
-    // If user not in DB, sync from OAuth server automatically
+    // As per `agents.md`, authentication is via NextAuth.js.
+    // The current flow checks for a user in the DB by `openId` from the session.
+    // If the user doesn't exist, it should not try to sync from an old OAuth server.
+    // For now, we'll simply throw if the user is not found in the DB after session verification.
+    // The actual user creation/syncing with NextAuth.js would happen in NextAuth.js callbacks.
     if (!user) {
-      try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
-        await db.upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: signedInAt,
-        });
-        user = await db.getUserByOpenId(userInfo.openId);
-      } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
-      }
-    }
-
-    if (!user) {
-      throw ForbiddenError("User not found");
+        throw ForbiddenError("User not found in database. Please ensure NextAuth.js is correctly configured for user creation.");
     }
 
     await db.upsertUser({
@@ -301,4 +296,4 @@ class SDKServer {
   }
 }
 
-export const sdk = new SDKServer();
+export const sdk = new SDKServer(); // No constructor arguments needed anymore

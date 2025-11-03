@@ -10,7 +10,7 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "dotenv -e .env.local -- drizzle-kit generate && dotenv -e .env.local -- drizzle-kit migrate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
@@ -50,6 +50,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cookie": "^1.0.2",
+    "csv-parse": "^6.1.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
@@ -62,6 +63,7 @@
     "mysql2": "^3.15.0",
     "nanoid": "^5.1.5",
     "next-themes": "^0.4.6",
+    "pg": "^8.16.3",
     "react": "^19.1.1",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.1.1",
@@ -88,6 +90,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "add": "^2.0.6",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
     "pnpm": "^10.15.1",
